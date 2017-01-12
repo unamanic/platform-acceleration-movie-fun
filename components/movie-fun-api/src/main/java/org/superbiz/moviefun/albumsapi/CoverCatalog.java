@@ -1,5 +1,6 @@
 package org.superbiz.moviefun.albumsapi;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -33,10 +34,15 @@ public class CoverCatalog {
         blobStore.put(coverBlob);
     }
 
+    @HystrixCommand(fallbackMethod = "buildDefaultCoverBlob")
     Blob getCover(long albumId) throws IOException {
         Optional<Blob> maybeCoverBlob = blobStore.get(coverBlobName(albumId));
 
         return maybeCoverBlob.orElseGet(this::buildDefaultCoverBlob);
+    }
+
+    Blob buildDefaultCoverBlob(long albumId) {
+        return buildDefaultCoverBlob();
     }
 
     private Blob buildDefaultCoverBlob() {
