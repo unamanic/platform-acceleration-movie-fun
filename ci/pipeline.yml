@@ -1,0 +1,41 @@
+---
+resources:
+- name: movie-fun-source
+  type: git
+  source:
+    uri: https://github.com/unamanic/platform-acceleration-movie-fun
+    branch: master
+
+- name: deploy-movie-fun
+  type: cf
+  source:
+    api: api.run-02.haas-66.pez.pivotal.io
+    username: {{cf-user}}
+    password: {{cf-password}}
+    organization: wwitt-pal
+    space: ci
+    skip_cert_check: true
+
+jobs:
+- name: deploy
+  public: true
+  plan:
+  - get: movie-fun-source
+    trigger: true
+  - task: package
+    file: movie-fun-source/ci/tasks/package.yml
+  - put: deploy-movie-fun
+    params:
+      manifest: movie-fun-source/manifest.yml
+      path: package-output/moviefun.war
+
+- name: smoke_test
+  public: true
+  plan:
+  - get: movie-fun-source
+    trigger: true
+    passed: [deploy]
+  - task: smoke_test
+    file: movie-fun-source/ci/tasks/smoke-test.yml
+    params:
+      MOVIE_FUN_URL: http://movie-fun-intemerate-antimacassar.cfapps-02.haas-66.pez.pivotal.io
