@@ -1,0 +1,11 @@
+applications:
+- name: moviefun
+  instances: 1
+  memory: 1024M
+  disk_quota: 1024M
+  routes:
+  - route: moviefun-unrevelational-armful.cfapps-02.haas-66.pez.pivotal.io
+  services:
+  - movies-mysql
+  stack: cflinuxfs2
+  path: target/moviefun.war
